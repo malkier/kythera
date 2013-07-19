@@ -22,7 +22,7 @@ GEM
       rb-kqueue (>= 0.2)
     lumberjack (1.0.4)
     method_source (0.8.1)
-    minitest (2.12.1)
+    minitest (4.7.5)
     minitest-reporters (0.14.20)
       ansi
       builder
@@ -50,6 +50,6 @@ PLATFORMS
 DEPENDENCIES
   guard
   guard-minitest
-  minitest (~> 2.0)
+  minitest
   minitest-reporters
   rake
