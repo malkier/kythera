@@ -1,3 +1,5 @@
+require_relative 'kythera/configuration'
+
 # Contains all of the application-wide stuff
 class Kythera
     # For backwards-incompatible changes
