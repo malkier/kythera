@@ -1,4 +1,5 @@
 class Configuration
-  def self.load!
+  def self.load_configuration
+    true
   end
 end
