@@ -1,3 +1,7 @@
+# Import required Ruby libs
+require 'ostruct'
+
+# Import our files
 require_relative 'kythera/configuration'
 
 # Contains all of the application-wide stuff
