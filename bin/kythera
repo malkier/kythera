@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+#
+# kythera: services for IRC networks
+# bin/kythera: app launcher
+#
+# Copyright (c) 2013 Eric Will <rakaur@malkier.net>
+# Rights to this code are documented in LICENSE
+#
+
+# Import required Ruby libs
+require 'rubygems'
+
+# Import the whole of Kythera
+require_relative '../lib/kythera'
+
+# Make sure we're in Kythera's working directory
+Dir.chdir File.expand_path('..', File.dirname(__FILE__))
+
+Kythera.new
+
+exit 0
