@@ -3,6 +3,7 @@ require 'ostruct'
 
 # Import our files
 require_relative 'kythera/configuration'
+require_relative 'kythera/uplink'
 
 # Contains all of the application-wide stuff
 class Kythera

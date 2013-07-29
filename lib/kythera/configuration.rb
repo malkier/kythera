@@ -39,7 +39,7 @@ class Configuration
 end
 
 module Configuration::DSL
-  attr_accessor :config_file, :me
+  attr_accessor :config_file, :me, :uplinks
 
   def daemon(&block)
     @me = OpenStruct.new
@@ -51,6 +51,27 @@ module Configuration::DSL
       throw :error, err
     end
   end
+
+  def uplink(host, port = 6667, &block)
+    ul = OpenStruct.new
+    ul.extend(Configuration::DSL::Uplink)
+
+    begin
+      ul.host = host.to_s
+      ul.port = port.to_i
+
+      ul.instance_eval(&block)
+    rescue Exception => err
+      throw :error, err
+    end
+
+    ul.name ||= ul.host
+
+    (@uplinks ||= []) << ul
+
+    # XXX - uplink priorities
+    #$config.uplinks.sort! { |a, b| a.priority <=> b.priority }
+  end
 end
 
 module Configuration::DSL::Daemon
@@ -58,6 +79,18 @@ module Configuration::DSL::Daemon
 
   def name(name)
     self.name = name
+  end
+end
+
+module Configuration::DSL::Uplink
+  private
+
+  def send_password(password)
+      self.send_password = password.to_s
+  end
+
+  def receive_password(password)
+      self.receive_password = password.to_s
   end
 end
 
