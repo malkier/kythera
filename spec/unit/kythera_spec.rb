@@ -1,22 +1,15 @@
 require_relative '../spec_helper'
 
 describe Kythera do
-  it "has the correct version number" do
-    Kythera::VERSION.must_equal "0.0.1"
-  end
+  let(:str) { "#{Kythera::ME}: version #{Kythera::VERSION} [#{RUBY_PLATFORM}]" }
+  let(:output) { MiniTest::Mock.new }
 
-  it "knows its name" do
-    Kythera::ME.must_equal "kythera"
-  end
+  subject { Kythera.new output }
 
   it "starts up" do
-    str = "#{Kythera::ME}: version #{Kythera::VERSION} [#{RUBY_PLATFORM}]"
-
-    output = MiniTest::Mock.new
     output.expect(:puts, nil, [str])
 
-    k = Kythera.new output
-    k.must_be_instance_of Kythera
+    subject.must_be_instance_of Kythera
 
     output.verify
   end

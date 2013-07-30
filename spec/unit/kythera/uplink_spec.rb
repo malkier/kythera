@@ -1,132 +1,118 @@
 require_relative '../../spec_helper'
 
 describe Uplink do
-  before do
-    @config = Configuration.new CONFIG_FILE
-    @config = @config.parse
+  let(:config) { Configuration.new(CONFIG_FILE).parse }
+  let(:socket) { MiniTest::Mock.new }
 
-    @uplink = Uplink.new @config.uplinks.first
-  end
+  subject { Uplink.new config.uplinks.first }
 
   describe "Configuration" do
     it "has an address" do
-      @uplink.config.host.must_equal "irc.malkier.net"
+      subject.config.host.must_equal "irc.malkier.net"
     end
 
     it "has a port" do
-      @uplink.config.port.must_equal 6667
+      subject.config.port.must_equal 6667
     end
 
     it "has a send password" do
-      @uplink.config.send_password.must_equal "send_linkage"
+      subject.config.send_password.must_equal "send_linkage"
     end
 
     it "has a receive password" do
-      @uplink.config.receive_password.must_equal "receive_linkage"
+      subject.config.receive_password.must_equal "receive_linkage"
     end
 
     it "has an SID" do
-      @uplink.config.sid.must_equal "KS0"
+      subject.config.sid.must_equal "KS0"
     end
   end
 
   describe "IRC Connection" do
-    before do
-      @read_return = "PASS #{@uplink.config.receive_password} TS 6 :777\r\n"
-      @write_line  = "PASS #{@uplink.config.send_password} TS 6 :777\r\n"
+    let(:read_ret)   { "PASS #{subject.config.receive_password} TS 6 :777\r\n" }
+    let(:write_line) { "PASS #{subject.config.send_password} TS 6 :777\r\n"    }
 
-      @socket = MiniTest::Mock.new
-      @uplink.connect @socket
-    end
+    before { subject.connect socket }
 
     it "connects to the IRC server" do
-      @uplink.connected?.must_equal true
+      subject.connected?.must_equal true
     end
 
     it "reads from the IRC server" do
-      @socket.expect(:read_nonblock, @read_return, [8192])
+      socket.expect(:read_nonblock, read_ret, [8192])
 
-      data = @uplink.read
-      data.must_equal @read_return
+      data = subject.read
+      data.must_equal read_ret
 
-      @socket.verify
+      socket.verify
     end
 
     it "writes to the IRC server" do
-      @socket.expect(:write_nonblock, @write_line.size, [@write_line])
-      written = @uplink.write @write_line.chomp
+      socket.expect(:write_nonblock, write_line.size, [write_line])
+      written = subject.write write_line.chomp
 
-      written.must_equal @write_line.length
+      written.must_equal write_line.length
 
-      @socket.verify
+      socket.verify
     end
   end
 
   describe "Exceptions" do
     it "raises an exception when unable to connect" do
-      @uplink.config.host = "127.0.0.1"
-      @uplink.config.port = 1
+      subject.config.host = "127.0.0.1"
+      subject.config.port = 1
 
-      -> { @uplink.connect }.must_raise Uplink::DisconnectedError
+      -> { subject.connect }.must_raise Uplink::DisconnectedError
     end
 
     it "raises an exception when unable to read" do
-      @socket = MiniTest::Mock.new
-
-      def @socket.read_nonblock(*args)
+      def socket.read_nonblock(*args)
         raise
       end
 
-      @uplink.connect @socket
+      subject.connect socket
 
-      -> { @uplink.read }.must_raise Uplink::DisconnectedError
+      -> { subject.read }.must_raise Uplink::DisconnectedError
     end
 
     it "raises an exception when read returns nil" do
-      @socket = MiniTest::Mock.new
-      @socket.expect(:read_nonblock, nil, [8192])
+      socket.expect(:read_nonblock, nil, [8192])
 
-      @uplink.connect @socket
+      subject.connect socket
 
-      -> { @uplink.read }.must_raise Uplink::DisconnectedError
+      -> { subject.read }.must_raise Uplink::DisconnectedError
 
-      @socket.verify
+      socket.verify
     end
 
     it "gracefully returns when reading would block" do
-      @socket = MiniTest::Mock.new
-
-      def @socket.read_nonblock(*args)
+      def socket.read_nonblock(*args)
         raise TestWaitReadable
       end
 
-      @uplink.connect @socket
+      subject.connect socket
 
-      @uplink.read.must_be_nil
+      subject.read.must_be_nil
     end
 
     it "raises an exception when unable to write" do
-      @socket = MiniTest::Mock.new
-
-      def @socket.write_nonblock(*args)
+      def socket.write_nonblock(*args)
         raise
       end
 
-      @uplink.connect @socket
+      subject.connect socket
 
-      -> { @uplink.write "test" }.must_raise Uplink::DisconnectedError
+      -> { subject.write "test" }.must_raise Uplink::DisconnectedError
     end
 
     it "gracefully returns when writing would block" do
-      @socket = MiniTest::Mock.new
-
-      def @socket.write_nonblock(*args)
+      def socket.write_nonblock(*args)
         raise TestWaitWritable
       end
 
-      @uplink.connect @socket
+      subject.connect socket
 
-      @uplink.write("test").must_be_nil
+      subject.write("test").must_be_nil
     end
   end
 end
