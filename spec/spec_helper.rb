@@ -2,8 +2,13 @@
 #require 'simplecov'
 #SimpleCov.start
 
+# Import required Ruby libs
+require "minitest/autorun"
+
+# Import required gems
 Bundler.require :test
 
+# Import our files
 require_relative "../lib/kythera"
 
 MiniTest::Reporters.use! [MiniTest::Reporters::SpecReporter.new]
