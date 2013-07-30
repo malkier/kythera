@@ -23,7 +23,7 @@ class Kythera
   ME = "kythera"
 
   # Get us up and running!
-  def initialize
-    puts "#{ME}: version #{VERSION} [#{RUBY_PLATFORM}]"
+  def initialize(out = $stdout)
+    out.puts "#{ME}: version #{VERSION} [#{RUBY_PLATFORM}]"
   end
 end

@@ -33,7 +33,7 @@ class Uplink
     begin
       data = @socket.read_nonblock 8192
     rescue IO::WaitReadable
-      return
+      return # Will go back to select and try again
     rescue Exception => err
       raise DisconnectedError, err
     end
@@ -41,6 +41,20 @@ class Uplink
     raise DisconnectedError, "empty read" if not data or data.empty?
 
     data
+  end
+
+  def write(line)
+    line += "\r\n"
+
+    begin
+      written = @socket.write_nonblock(line)
+    rescue IO::WaitWritable
+      return # Will go back to select and try again
+    rescue Exception => err
+      raise DisconnectedError, err
+    end
+
+    written
   end
 
   class DisconnectedError < Exception

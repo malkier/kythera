@@ -92,6 +92,10 @@ module Configuration::DSL::Uplink
   def receive_password(password)
       self.receive_password = password.to_s
   end
+
+  def sid(sid)
+    self.sid = sid.to_s
+  end
 end
 
 class Configuration::ParseError < Exception
