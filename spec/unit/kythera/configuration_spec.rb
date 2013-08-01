@@ -27,4 +27,26 @@ describe Configuration do
       subject.me.name.wont_be_nil
     end
   end
+
+  # These are really useless, but it makes the code coverage work
+  describe "Exceptions" do
+    let(:bad_daemon) { Configuration.new BAD_DAEMON }
+    let(:bad_uplink) { Configuration.new BAD_UPLINK }
+
+    it "detects malformed daemon blocks" do
+      bad_daemon.stub(:abort, nil) do
+        bad_daemon.stub(:puts, nil) { bad_daemon.parse }
+      end
+
+      bad_daemon.must_be_instance_of Configuration
+    end
+
+    it "detects malformed uplink blocks" do
+      bad_uplink.stub(:abort, nil) do
+        bad_uplink.stub(:puts, nil) { bad_uplink.parse }
+      end
+
+      bad_uplink.must_be_instance_of Configuration
+    end
+  end
 end

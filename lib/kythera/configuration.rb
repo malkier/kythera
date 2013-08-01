@@ -27,9 +27,10 @@ class Configuration
       puts 'kythera: error loading configuration:'
       puts "\t#{error}"
 
-      line = error.backtrace[1].split(':')[1]
+      file = @config_file.split(File::SEPARATOR)[-2 .. -1].join(File::SEPARATOR)
+      line = error.backtrace[2].split(':')[2]
 
-      puts "\t\t#{$0}:#{line}"
+      puts "\t\t#{file}:#{line}"
 
       abort
     end
