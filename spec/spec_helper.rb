@@ -1,4 +1,7 @@
-# SimpleCov is a special case
+# Code-coverage utilites
+require 'coveralls'
+Coveralls.wear!
+
 #require 'simplecov'
 #SimpleCov.start
 
