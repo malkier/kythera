@@ -1,9 +1,11 @@
 # Code-coverage utilites
+require 'simplecov'
+SimpleCov.start do
+  add_filter '/.bundle/'
+end
+
 require 'coveralls'
 Coveralls.wear!
-
-require 'simplecov'
-SimpleCov.start
 
 # Import required Ruby libs
 require "minitest/autorun"
