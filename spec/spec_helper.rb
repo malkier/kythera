@@ -2,8 +2,8 @@
 require 'coveralls'
 Coveralls.wear!
 
-#require 'simplecov'
-#SimpleCov.start
+require 'simplecov'
+SimpleCov.start
 
 # Import required Ruby libs
 require "minitest/autorun"

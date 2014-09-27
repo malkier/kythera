@@ -32,6 +32,9 @@ describe Uplink do
     let(:read_ret)   { "PASS #{subject.config.receive_password} TS 6 :777\r\n" }
     let(:write_line) { "PASS #{subject.config.send_password} TS 6 :777\r\n"    }
 
+    let(:broken_read_1) { ":malkier NOTICE rakaur :you" }
+    let(:broken_read_2) { "'re fucking awesome\r\n" }
+
     before { subject.connect socket }
 
     it "connects to the IRC server" do
@@ -39,10 +42,29 @@ describe Uplink do
     end
 
     it "reads from the IRC server" do
-      socket.expect(:read_nonblock, read_ret, [8192])
+      socket.expect(:read_nonblock, read_ret, [Integer])
 
       data = subject.read
       data.must_equal read_ret
+
+      socket.verify
+    end
+
+    it "read correctly assembles incomplete lines" do
+      socket.expect(:read_nonblock, broken_read_1, [Integer])
+      socket.expect(:read_nonblock, broken_read_2, [Integer])
+      socket.expect(:read_nonblock, "\n",          [Integer])
+
+      subject.read
+      subject.recvq.must_equal [broken_read_1]
+
+      # Stub #parse here or it would wipe out @recvq
+      subject.stub(:parse, nil) { subject.read }
+      subject.recvq.must_equal [broken_read_1 + broken_read_2]
+
+      # Now actually test that #parse wiped out @recvq
+      subject.read
+      subject.recvq.must_be_empty
 
       socket.verify
     end
@@ -52,6 +74,36 @@ describe Uplink do
       written = subject.write write_line.chomp
 
       written.must_equal write_line.length
+
+      socket.verify
+    end
+  end
+
+  describe "Parser" do
+    let(:data) do
+      "PASS #{subject.config.receive_password} TS 6 :777\r\n" +
+      ":origin COMMAND target :free form text\r\n" +
+      "COMMAND target :free form text\r\n" +
+      ":origin COMMAND :free form text\r\n"
+    end
+
+    let(:parsed_data) do
+      [
+        [nil, "PASS", [subject.config.receive_password, "TS", "6", "777"]],
+        ["origin", "COMMAND", ["target", "free form text"]],
+        [nil, "COMMAND", ["target", "free form text"]],
+        ["origin", "COMMAND", ["free form text"]]
+      ]
+    end
+
+    before { subject.connect socket }
+
+    it "parses IRC data into parv" do
+      socket.expect(:read_nonblock, data, [Integer])
+
+      subject.read
+
+      parsed_data.must_equal parsed_data
 
       socket.verify
     end
@@ -76,7 +128,7 @@ describe Uplink do
     end
 
     it "raises an exception when read returns nil" do
-      socket.expect(:read_nonblock, nil, [8192])
+      socket.expect(:read_nonblock, nil, [Integer])
 
       subject.connect socket
 

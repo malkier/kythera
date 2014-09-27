@@ -1,15 +1,15 @@
 require_relative '../spec_helper'
 
 describe Kythera do
-  let(:output) { MiniTest::Mock.new }
-
-  subject { Kythera.new output }
+  before do
+    @kythera = nil
+  end
 
   it "starts up" do
-    output.expect(:puts, nil, [String])
+    @kythera.stub(:puts, nil) do
+      @kythera = Kythera.new
+    end
 
-    subject.must_be_instance_of Kythera
-
-    output.verify
+    @kythera.must_be_instance_of Kythera
   end
 end
